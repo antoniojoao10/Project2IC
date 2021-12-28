@@ -5,9 +5,16 @@
 #include <bitset>
 #include <type_traits>
 #include<climits>
+#include<iostream>
+#include<fstream>
+#include<vector>  
+#include<stdio.h>
+#include<string.h>
+#include<sndfile.h>
+#include <map>
+#include <iterator>
+
 using namespace std;
-
-
 class Golomb{
     public:
       char *una[10] = {
@@ -95,9 +102,77 @@ class Golomb{
 };
 
 int main(int argc, char** argv) {
-  Golomb gl;
-  string res = gl.encoder(atoi(argv[1]), atoi(argv[2]));
-  cout << res << endl;
-  cout << gl.decoder(atoi(argv[1]), res) << endl;
-  return 0;
+    Golomb gl;
+    SNDFILE* read_file;
+    SNDFILE* out_file;
+
+    ofstream ot ("test1.txt");
+    ofstream hist("hist.txt");
+    
+    ofstream ofs (argv[2]);
+    //ofstream ofs (argv[2], ios::out | ios::binary);
+    
+ 
+    SF_INFO		sfinfo ;     
+    read_file = sf_open(argv[1], SFM_READ, &sfinfo);
+    short *tmpIn = new short[sfinfo.channels * sfinfo.frames];
+    sf_read_short(read_file, tmpIn, sfinfo.channels * sfinfo.frames);
+    int channels = sfinfo.channels;
+    int frame = sfinfo.frames;
+    sf_close(read_file);     
+    int total = 0;
+    vector<int> re;
+    map<int,int> histMap;
+    int cnt =0; 
+    int diff = 0; 
+    int p = 0;
+    for(int i  =0; i < frame*channels ; i++){
+        switch (cnt){
+            case 0:
+                break;
+            case 1:
+                p = tmpIn[i-1];
+                break;
+            case 2:
+                p = 2*tmpIn[i-1] - tmpIn[i-2];
+                break;
+            case 3:
+                p = 3*tmpIn[i-1] - 3*tmpIn[i-2] + tmpIn[i-3];
+                break;
+            default:
+                diff++;
+                p=0;
+                cnt=0;
+        }
+        re.push_back(tmpIn[i] - p);
+
+        //histogram
+        histMap[tmpIn[i] - p] ++;
+
+
+        cnt++;
+        ot << re.at(i) << endl;
+
+        string res = gl.encoder( 10000 , re.at(i));
+
+        ofs << res << endl;
+        /*
+        int res = gl.encoder( 10000 , re.at(i)).length();
+
+        // declaring character array
+        char arr[sz + 1];
+    
+        // copying the contents of the
+        // string to char array
+        strcpy(arr, gl.encoder( 10000 , re.at(i)).c_str());
+        ofs.write(arr, 25); //
+        */
+        
+    } 
+
+    map<int, int>::iterator itr;
+    for (itr = histMap.begin(); itr != histMap.end(); ++itr) {
+        hist << itr->first << "\t ----> \t" << itr->second << endl;
+    }
+    return 0;
 }
