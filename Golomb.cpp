@@ -10,11 +10,6 @@ using namespace std;
 
 class Golomb{
     public:
-      char *una[10] = {
-        "0","10","110","1110",
-        "11110","111110","1111110",
-        "11111110","111111110","1111111110"
-      };
 
       #define IS_INTEGRAL(T) typename std::enable_if< std::is_integral<T>::value >::type* = 0
 
@@ -32,7 +27,11 @@ class Golomb{
         int k =  ceil(log2(m));
         int r = s%m;
         int q = floor(s/m);
-        string qo = una[q];
+        string qo = "";
+        for( int i = 0; i< q ; i++){
+          qo += "1";
+        }
+        qo += "0";
         int t = pow(2,k) - m;
         string ro = "";
 
@@ -94,10 +93,10 @@ class Golomb{
         
 };
 
-int main(int argc, char** argv) {
+/*int main(int argc, char** argv) {
   Golomb gl;
   string res = gl.encoder(atoi(argv[1]), atoi(argv[2]));
   cout << res << endl;
   cout << gl.decoder(atoi(argv[1]), res) << endl;
   return 0;
-}
+}*/

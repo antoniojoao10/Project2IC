@@ -23,7 +23,6 @@ int main(int argc, char** argv) {
     SNDFILE* out_file;
 
     //ofstream ot ("test1.txt");
-    //ofstream test ("bin.txt");
     
     //ofstream ofs (argv[2]);
     ofstream ofs (argv[2], ios::out | ios::binary);
@@ -59,17 +58,26 @@ int main(int argc, char** argv) {
         }
         cnt++;
 
-        re.push_back(tmpIn[i] - p);
+        int resi = tmpIn[i] - p;
+
+        
+        int tmp = resi >> 12;
+        resi = tmp << 12;
+        int tp = resi;
+        if( tp - resi == 0)  resi = tp;
+        else resi = tp/(tp-resi);
+
+        re.push_back(resi);
 
         //histogram
-        histMap[tmpIn[i] - p] ++;
+        histMap[resi] ++;
 
 
         //ot << re.at(i) << endl;
 
         string res = gl.encoder( 50000 , re.at(i));
 
-        //test << res << endl;
+        //ofs << res << endl;
 
         int sz = gl.encoder( 50000 , re.at(i)).length();
 
