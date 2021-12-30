@@ -14,23 +14,23 @@ int numYBits = 0;
 int numUBits = 0;
 int numVBits = 0;
 
-Mat shift(Mat originalImage) {
+Mat shift(Mat originalImage, int numBits) {
     for (int idxCols = 0; idxCols < originalImage.cols; idxCols++)
         for (int idxRows = 0; idxRows < originalImage.rows; idxRows++) {
-            originalImage.at<Vec3b>(idxCols, idxRows)[0] = originalImage.at<Vec3b>(idxCols, idxRows)[0] >> 12;
-            originalImage.at<Vec3b>(idxCols, idxRows)[1] = originalImage.at<Vec3b>(idxCols, idxRows)[1] >> 12;
-            originalImage.at<Vec3b>(idxCols, idxRows)[2] = originalImage.at<Vec3b>(idxCols, idxRows)[2] >> 12;
+            originalImage.at<Vec3b>(idxCols, idxRows)[0] = originalImage.at<Vec3b>(idxCols, idxRows)[0] >> numBits;
+            originalImage.at<Vec3b>(idxCols, idxRows)[1] = originalImage.at<Vec3b>(idxCols, idxRows)[1] >> numBits;
+            originalImage.at<Vec3b>(idxCols, idxRows)[2] = originalImage.at<Vec3b>(idxCols, idxRows)[2] >> numBits;
         }
 
     return originalImage;
 }
 
-Mat reverse_shift(Mat finalImage) {
+Mat reverse_shift(Mat finalImage, int numBits) {
     for (int idxCols = 0; idxCols < finalImage.cols; idxCols++)
         for (int idxRows = 0; idxRows < finalImage.rows; idxRows++) {
-            finalImage.at<Vec3b>(idxCols, idxRows)[0] = finalImage.at<Vec3b>(idxCols, idxRows)[0] << 12;
-            finalImage.at<Vec3b>(idxCols, idxRows)[1] = finalImage.at<Vec3b>(idxCols, idxRows)[1] << 12;
-            finalImage.at<Vec3b>(idxCols, idxRows)[2] = finalImage.at<Vec3b>(idxCols, idxRows)[2] << 12;
+            finalImage.at<Vec3b>(idxCols, idxRows)[0] = finalImage.at<Vec3b>(idxCols, idxRows)[0] << numBits;
+            finalImage.at<Vec3b>(idxCols, idxRows)[1] = finalImage.at<Vec3b>(idxCols, idxRows)[1] << numBits;
+            finalImage.at<Vec3b>(idxCols, idxRows)[2] = finalImage.at<Vec3b>(idxCols, idxRows)[2] << numBits;
         }
 
     return finalImage;
@@ -263,7 +263,7 @@ void decode_image(Mat yuvImage, string fileName[]) {
     cvtColor(yuvImage, finalImage, COLOR_YUV2BGR_I420);
 
     // Reverse lossy
-    finalImage = reverse_shift(finalImage);
+    finalImage = reverse_shift(finalImage, numBits);
 
     imwrite("new_image.ppm", finalImage);
     waitKey(0);
@@ -275,7 +275,8 @@ int main(int argc, char **argv) {
     Mat originalImage = imread(originalImageName, IMREAD_COLOR);
 
     // Lossy
-    originalImage = shift(originalImage);
+    numBits = atoi(argv[2]);
+    originalImage = shift(originalImage, numBits);
     
     // Transform the image into the YUV 4:2:0 format
     Mat yuvImage;
