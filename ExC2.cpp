@@ -154,7 +154,7 @@ void encode_image(Mat originalImage, Mat yuvImage, string fileName[]) {
     }
 }
 
-void decode_image(Mat yuvImage, string fileName[]) {
+void decode_image(Mat yuvImage, string fileName[], int numBits) {
     // Get bits from files and decode ---- DOES NOT WORK -----
     // Y Channel
     Golomb golY;
@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
     Mat originalImage = imread(originalImageName, IMREAD_COLOR);
 
     // Lossy
-    numBits = atoi(argv[2]);
+    int numBits = atoi(argv[2]);
     originalImage = shift(originalImage, numBits);
     
     // Transform the image into the YUV 4:2:0 format
@@ -287,7 +287,7 @@ int main(int argc, char **argv) {
 
     // Encode and decode images
     encode_image(originalImage, yuvImage, fileName);
-    decode_image(yuvImage, fileName);
+    decode_image(yuvImage, fileName, numBits);
 
     return 0;
 }
